@@ -21,6 +21,7 @@ class ImageController
   public function Create()
   {
     header("Access-Control-Allow-Origin: http://localhost:8000");    
+    // header("Access-Control-Allow-Origin: http://localhost:8000");    
     header('Access-Control-Allow-Credentials: false');
     header("Access-Control-Allow-Methods: GET, POST");    
     header("Access-Control-Allow-Headers: *");
@@ -30,19 +31,20 @@ class ImageController
     $filename = "";
     $extension_file = ""; 
     $status = "";
-    $image_dir = __DIR__ . "/../../uploads/";
+    $image_dir = __DIR__ . "/../../../public/uploads/";
     $allows_extensions = "/^jpg$|^png$|^webp$/";
 
-    if(isset($_FILES))
+    if(isset($_FILES["image"]))
     {
-      $target_name = $image_dir . basename($_FILES["image"]["name"]);
-      $filename = basename($_FILES["image"]["name"]);
-      if(file_exists($target_name))
+      $target_name = $image_dir . $_FILES["image"]["name"];
+      $filename = $_FILES["image"]["name"];
+      if(file_exists($target_name) === true)
       {
         $error = true;        
         $json = [
           "status" => 401,
-          "message" => "The file already exists"
+          "message" => "The file already exists",
+          "files" => $_FILES
         ];
         return new Response('json', json_encode($json));
       }
@@ -64,17 +66,24 @@ class ImageController
         http_response_code($status);
       }
     } else {
-      throw new \Exception("There is no file", 1);
+      $json = [
+        "status" => 401,
+        "message" => "There is no file",
+      ];
+      return new Response('json', json_encode($json));
     }
 
     
   
-    $resp = $this->db->insertOneInto('images', 'url', "$filename");
+    $resp = $this->db->insertOneInto("images", "url", "http://localhost:3000/uploads/$filename");
 
+    $message = "The image was move successfully";
     $json = [
       "status" => $status,
       "message" => $message,
-      "response" => $resp
+      "data" => [
+        "id" => $resp
+      ]
     ];
 
     http_response_code($status);

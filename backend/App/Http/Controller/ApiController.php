@@ -27,8 +27,13 @@ class ApiController
   }
 
   public function Find($id){
+    
+    header("Access-Control-Allow-Origin: http://localhost:8000");    
+    header('Access-Control-Allow-Credentials: false');
+    header("Access-Control-Allow-Methods: GET"); 
+    $resource = $this->db->selectOne('images', '*', $id);
     $json = [
-      "data" => $this->db->selectOne('images', '*', $id),
+      "data" => $resource[0],
       "status" => 200
     ];
     http_response_code(200);

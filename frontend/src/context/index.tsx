@@ -1,12 +1,17 @@
 import React, { createContext, useState } from 'react'
 
-export const Context = createContext({})
+type State = {
+  lastImage?: string | null;
+  setLastImage: Function; 
+}
+
+export const Context = createContext<State>({lastImage: null, setLastImage: () => {}})
 
 export const Provider:React.FC = ({ children }) => {
 
   const [lastImage, setLastImage] = useState<string | null>(null)
 
-  const state = {
+  const state:State = {
     lastImage,
     setLastImage
   }

@@ -129,10 +129,8 @@ class DB_MYSQL {
     {
       $last_id = $this->database->insert_id;
       return $last_id;
-    } else {
-      echo($this->database);
-      die();
-      throw new \Exception("\\{$this->database["error"]}", 1);
+    } else if($this->database->error){
+      throw new \Exception("\\{$this->database->error}", 1);
     }
 
   }

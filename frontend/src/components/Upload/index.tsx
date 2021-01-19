@@ -1,27 +1,39 @@
-import React, {useState, useCallback, useRef} from 'react'
+import React, {useState, useCallback, useRef, useContext} from 'react'
+import { useNavigate } from '@reach/router'
 import { useDropzone } from 'react-dropzone'
+
+import { Context } from '../../context'
 
 import DropImage from '../../assets/images/drop_image.png'
 import '../../assets/styles/upload.css'
 
 export const Upload = ({setLoading}:{setLoading: Function}) => {
 
+  const { setLastImage } = useContext(Context)
+  const navigate = useNavigate()
+
   const formRef = useRef<HTMLFormElement | null>(null)
   const onDrop = useCallback(async acceptedFiles => {
     setLoading(true);
-    const formData = new FormData()
-    formData.append('image', acceptedFiles[0], acceptedFiles[0].name)
+    const formdata = new FormData()
+    formdata.append('image', acceptedFiles[0], acceptedFiles[0].name)
+
     const data = await fetch('http://localhost:3000/image/create', {
       method: 'POST',
-      headers: new Headers({
-        'Access-Control-Allow-Origin': 'http://localhost:8000',
-        'Content-Type': 'multipart/form-data; boundary=<calculated when request is sent></calculated>'
-      }),
-      mode: 'no-cors',
-      body: formData
+      body: formdata,
     })
+
     const resp = await data.json()
-    console.log(resp)
+    
+    if(resp.status === 401 || !resp) {
+      setLoading(false)
+      console.error(resp)
+    } else if(resp.status === 201) {
+      setLoading(false)
+      setLastImage(resp.data.id)
+      navigate('/success')
+    }
+
   }, [])
 
   const { isDragActive, getInputProps, getRootProps } = useDropzone({onDrop})
