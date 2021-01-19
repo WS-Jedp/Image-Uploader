@@ -20,6 +20,11 @@ class ImageController
   */
   public function Create()
   {
+    header("Access-Control-Allow-Origin: http://localhost:8000");    
+    header('Access-Control-Allow-Credentials: false');
+    header("Access-Control-Allow-Methods: GET, POST");    
+    header("Access-Control-Allow-Headers: *");
+
     global $error; 
     $target_name = ""; 
     $filename = "";
@@ -34,8 +39,12 @@ class ImageController
       $filename = basename($_FILES["image"]["name"]);
       if(file_exists($target_name))
       {
-        $error = true;
-        throw new \Exception("The file already exists", 1);
+        $error = true;        
+        $json = [
+          "status" => 401,
+          "message" => "The file already exists"
+        ];
+        return new Response('json', json_encode($json));
       }
       
       $extension_file = strtolower(pathinfo($target_name, PATHINFO_EXTENSION));

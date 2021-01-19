@@ -4,8 +4,19 @@
   padding: 0;
   text-decoration: none;
   list-style: none;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
  background-color: #fff; 
+}
+
+.success__links {
+  margin: 6px;
+  padding: 12px;
+}
+
+.success__links a {
+  color: gray;
+  margin: 21px;
 }

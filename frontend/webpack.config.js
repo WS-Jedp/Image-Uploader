@@ -39,7 +39,16 @@ module.exports = {
           },
           'css-loader'
         ]
-      }
+      },
+      {
+        test: /\.(jpeg|png|jpg)/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'file-loader',
+          }
+        ]
+      },
     ]
   },
   plugins: [

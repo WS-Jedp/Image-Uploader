@@ -1,0 +1,50 @@
+.loading__component {
+  position: relative;
+  display: flex;
+  flex-flow: column nowrap;
+  min-width: 200px;
+  width: 30%;
+  background-color: white;
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: 0 0 15px 1px rgba(0,0,0,0.03);
+}
+
+.loading__title {
+  padding: 6px;
+  font-size: 18px;
+  font-weight: 500;
+  color: gray;
+}
+
+.loading {
+  position: relative;
+  width: 90%;
+  height: 8px;
+  margin: 9px;
+  background-color: rgba(0,0,0,0.05);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.loading__bar {
+  position: absolute;
+  display: flex;
+  left: 0;
+  top: 0;
+  width: 120px;
+  height: 8px;
+  background-color: #418eea;
+  border-radius: 6px;
+  z-index: 90;
+  animation: loading_animation infinite 2s ease-in-out;
+}
+
+@keyframes loading_animation {
+  from {
+    left: -120px;
+  } to {
+    left: 120%;
+    right: 0;
+  }
+}

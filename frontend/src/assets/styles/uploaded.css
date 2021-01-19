@@ -1,0 +1,27 @@
+.uploaded {
+  position: relative;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+  min-width: 300px;
+  width: 36%;
+  min-height: 500px;
+  height: 50%;
+  background-image: white;
+  box-shadow: 0 0 19px 1px rgba(0,0,0,0.1);
+  border-radius: 3%;
+  padding: 12px;
+}
+
+.uploaded__title {
+  font-size: 18px;
+  margin: 12px;
+}
+
+.uploaded__image {
+  width: 70%;
+  margin: 12px;
+  object-fit: cover;
+  border-radius: 21px;
+}

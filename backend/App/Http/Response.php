@@ -43,6 +43,6 @@ class Response {
 
   public function send()
   {
-    $this->setResponse($this->type);
+    return $this->setResponse($this->type);
   }
 }
