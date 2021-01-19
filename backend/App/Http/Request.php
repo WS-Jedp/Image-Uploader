@@ -49,12 +49,12 @@ class Request {
   }
 
   public function getMethod(){
-    if(empty($this->params))
-    {
       return ucfirst($this->method);
-    }
+  }
 
-    return ucfirst("$this->method($this->params)");
+  public function getParams()
+  {
+    return $this->params;
   }
 
 
@@ -69,7 +69,8 @@ class Request {
     $response = call_user_func([
       new $controller,
       $method
-    ]);
+    ], $this->getParams());
+
 
     $response->send();
 

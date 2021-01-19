@@ -37,8 +37,7 @@ class Response {
         echo $this->getJson();
         
       default:
-        $this->getView();
-        break;
+        return "Bad resopnse type";
     }
   }
 

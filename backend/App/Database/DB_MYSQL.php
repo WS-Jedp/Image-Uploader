@@ -7,9 +7,14 @@ class DB_MYSQL {
   protected $database;
   protected $connection = false;
 
-  public function __construct($host, $password, $username, $db)
+  private $host = 'localhost:3306';
+  private $password = 'Jedp05022001082';
+  private $username = 'root';
+  private $db = 'image_uploader';
+
+  public function __construct()
   {
-    $this->connect($host, $username, $password, $db);
+    $this->connect($this->host, $this->username, $this->password, $this->db);
   }
     
   private function connect($host, $username, $password, $db)
@@ -17,6 +22,7 @@ class DB_MYSQL {
     if(!$this->connection)
     {
       $this->database = new \mysqli($host, $username, $password, $db);
+      $this->connection = true;
     }
 
     if($this->database->connect_error)
@@ -33,6 +39,80 @@ class DB_MYSQL {
     $this->database->close();
   }
 
+  
+  /**
+   ** SELECT FUNCTIONS TO GET INFORMATINO 
+   * 
+   * SELECT MULTIPlE
+   */
+  public function selectMultiple($table, $columns, $condition = null)
+  {
+    if(!$this->connection)
+    {
+      $this->connect($this->host, $this->username, $this->password, $this->db);
+    }
+
+    $columns_statement = "";
+    for ($i=0; $i <= count($columns); $i++) { 
+      $columns_statement .= "$columns[$i]";
+      if(!$i === count($columns))
+      {
+        $columns_statement .= ",";
+      }
+    }
+
+    $sql_statement = "SELECT $columns_statement FROM $table";
+
+    if(isset($condition))
+    {
+      $sql_statement .= " WHERE $condition";
+    }
+
+    $result = $this->database->query($sql_statement); 
+    $json = [];
+
+    if($result->num_rows > 0) 
+    {
+      while($row = $result->fetch_assoc())
+      {
+        array_push($json, $row);
+      }
+      return $json;
+    }
+  }
+
+  /**
+   * SELECT ONE
+    */
+  public function selectOne($table, $columns, $id)
+  {
+    if(!$this->connection)
+    {
+      $this->connect($this->host, $this->username, $this->password, $this->db);
+    }
+
+    $columns_statement = "";
+    for ($i=0; $i <= count($columns); $i++) { 
+      $columns_statement .= "$columns[$i]";
+      if(!$i === count($columns))
+      {
+        $columns_statement .= ",";
+      }
+    }
+
+    $result = $this->database->query("SELECT $columns_statement FROM $table WHERE id=$id");
+    $data = [];
+    if($result->num_rows > 0)
+    {
+      while($row = $result->fetch_assoc())
+      {
+        array_push($data, $row);
+      }
+      return $data;
+    }
+
+  }
+
   /**
     ** INSERT FUNCTION **
     * INSERT ONE *
@@ -41,13 +121,18 @@ class DB_MYSQL {
   {
     if(!$this->connection)
     {
-      $this->connect();
+      $this->connect($this->host, $this->username, $this->password, $this->db);
     }
 
-    $this->database->query("INSERT INTO $table ($columns) VALUES ($values)");
-    $last_id = $this->database->insert_id;
+    
+    if($this->database->query("INSERT INTO $table ($columns) VALUES ('$values')") === TRUE)
+    {
+      $last_id = $this->database->insert_id;
+      return $last_id;
+    } else if(isset($this->database["error"])){
+      throw new \Exception("\\{$this->database["error"]}", 1);
+    }
 
-    return $last_id;
   }
 
   /**
@@ -57,7 +142,7 @@ class DB_MYSQL {
   {
     if(!$this->connection)
     {
-      $this->connect();
+      $this->connect($this->host, $this->username, $this->password, $this->db);
     }
 
     $sql_statement = "";
@@ -75,15 +160,27 @@ class DB_MYSQL {
   {
     if(!$this->connection)
     {
-      $this->connect();
+      $this->connect($this->host, $this->username, $this->password, $this->db);
+
     }
 
     $sql_update_statement = "";
+    $index = 0;
     foreach ($data as $column => $value) {
-      $sql_update_statement .= "$column = $value,";
+      $sql_update_statement .= "$column = '$value'";
+      if(!$index === count($data))
+      {
+        $sql_update_statement .= ',';
+      }
+      $index++;
     }
 
-    $this->database->query("UPDATE $table SET $sql_update_statement WHERE id=$id");
+    if($this->database->query("UPDATE $table SET $sql_update_statement WHERE id=$id") === TRUE)
+    {
+      return "Created";
+    } elseif($this->database["error"]){
+      return $this->database["error"];
+    }
   }
 
   /**
@@ -93,10 +190,10 @@ class DB_MYSQL {
   {
     if(!$this->connection)
     {
-      $this->connect();
+      $this->connect($this->host, $this->username, $this->password, $this->db);
     }
 
-    $this->database->query("DELETE FROM $table WHERE id=$id");
+    return $this->database->query("DELETE FROM $table WHERE id=$id");
   }
 
 
@@ -107,10 +204,10 @@ class DB_MYSQL {
   {
     if(!$this->connection)
     {
-      $this->connect();
+      $this->connect($this->host, $this->username, $this->password, $this->db);
     }
 
-    $sql_statment = "";
+    $sql_statement = "";
     for ($i=0; $i <= count($data); $i++) { 
       $sql_statement .= "DELETE FROM $table WHERE id=" . $data[$i];
     }

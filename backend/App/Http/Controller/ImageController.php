@@ -8,60 +8,67 @@ use \App\Database\DB_MYSQL;
 class ImageController
 {
 
+  protected $db;
+
+  public function __construct()
+  {
+    $this->db = new DB_MYSQL();
+  }
   
   /**
   ** CREATE METHOD **
   */
   public function Create()
   {
-    $db = new DB_MYSQL('localhost:3306', 'Jedp05022001082', 'root', 'image_uploader');
+    global $error; 
     $target_name = ""; 
-    $error = null; 
-    $extension_file; 
+    $filename = "";
+    $extension_file = ""; 
     $status = "";
-    $image_dir = "files/images";
+    $image_dir = __DIR__ . "/../../uploads/";
     $allows_extensions = "/^jpg$|^png$|^webp$/";
 
-    
-    if(isset($_POST["submit"]))
+    if(isset($_FILES))
     {
       $target_name = $image_dir . basename($_FILES["image"]["name"]);
+      $filename = basename($_FILES["image"]["name"]);
       if(file_exists($target_name))
       {
         $error = true;
-        throw new Exception("The file already exists", 1);
+        throw new \Exception("The file already exists", 1);
       }
       
       $extension_file = strtolower(pathinfo($target_name, PATHINFO_EXTENSION));
       if(!preg_match($allows_extensions, $extension_file))
       {
-        throw new Exception("We can't handle the file", 1);
+        throw new \Exception("We can't handle the file", 1);
       }
 
       if(move_uploaded_file($_FILES["image"]["tmp_name"], $target_name))
       {
         $status = 201;
         $message = "The images was move successfully";
+        http_response_code($status);
       } else {
         $status = 401;
-        $message = "There is an error";
+        $message = "There is an error, we can't move the file";
+        http_response_code($status);
       }
     } else {
-      throw new Exception("There is no file", 1);
+      throw new \Exception("There is no file", 1);
     }
 
     
-    
-    $resp = $this->db->insertOneInto('images', "'url'", "'$image_dir'");
+  
+    $resp = $this->db->insertOneInto('images', 'url', "$filename");
 
     $json = [
       "status" => $status,
       "message" => $message,
+      "response" => $resp
     ];
 
-    if($status = 201) {
-      $json["id"][$resp];
-    }
+    http_response_code($status);
 
     return new Response('json', json_encode($json));
   }
@@ -72,27 +79,28 @@ class ImageController
   */
   public function Update($id)
   {
-    $target_name;
-    $error; 
-    $extension_file; 
-    $status;
-    $image_dir = "files/images";
+
+    $target_name = "";
+    $error = NULL; 
+    $extension_file = ""; 
+    $status = 200;
+    $image_dir = __DIR__ . "/../../uploads/";
     $allows_extensions = "/^jpg$|^png$|^webp$/";
 
     
-    if(isset($_POST["submit"]))
+    if(isset($_FILES))
     {
       $target_name = $image_dir . basename($_FILES["image"]["name"]);
       if(file_exists($target_name))
       {
         $error = true;
-        throw new Exception("The file already exists", 1);
+        throw new \Exception("The file already exists", 1);
       }
       
       $extension_file = strtolower(pathinfo($target_name, PATHINFO_EXTENSION));
       if(!preg_match($allows_extensions, $extension_file))
       {
-        throw new Exception("We can't handle the file", 1);
+        throw new \Exception("We can't handle the file", 1);
       }
 
       if(move_uploaded_file($_FILES["image"]["tmp_name"], $target_name))
@@ -104,12 +112,12 @@ class ImageController
         $message = "There is an error";
       }
     } else {
-      throw new Exception("There is no file", 1);
+      throw new \Exception("There is no file", 1);
     }
 
     
     
-    $resp = $this->db->updateOne($id, 'images', ["url" => $image_dir]);
+    $resp = $this->db->updateOne('images', $id, ["url" => $_FILES["image"]["name"]]);
 
     $json = [
       "status" => $status,
@@ -133,7 +141,8 @@ class ImageController
     $resp = $this->db->deleteOne('images', $id);
     $json = [
       "status" => 201,
-      "message" => "The images was deleted succesfully"
+      "message" => "The images was deleted succesfully",
+      "response" => $resp
     ];
 
     return new Response('json', json_encode($json));
