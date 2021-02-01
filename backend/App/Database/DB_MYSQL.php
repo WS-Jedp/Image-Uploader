@@ -2,6 +2,8 @@
 
 namespace App\Database;
 
+use \App\Helpers\ErrorReport;
+
 class DB_MYSQL {
 
   protected $database;
@@ -86,6 +88,8 @@ class DB_MYSQL {
     */
   public function selectOne($table, $columns, $id)
   {
+    $error_report = new ErrorReport();
+
     if(!$this->connection)
     {
       $this->connect($this->host, $this->username, $this->password, $this->db);
@@ -101,6 +105,11 @@ class DB_MYSQL {
     }
 
     $result = $this->database->query("SELECT $columns_statement FROM $table WHERE id=$id");
+
+    if($this->database->error) {
+      return $error_report->report_db_error("The image $id doesn't exists");
+    }
+
     $data = [];
     if($result->num_rows > 0)
     {
@@ -119,6 +128,7 @@ class DB_MYSQL {
   */
   public function insertOneInto($table, $columns, $values)
   {
+    $error_report = new ErrorReport();
     if(!$this->connection)
     {
       $this->connect($this->host, $this->username, $this->password, $this->db);
@@ -127,10 +137,11 @@ class DB_MYSQL {
     
     if($this->database->query("INSERT INTO $table ($columns) VALUES ('$values')") === TRUE)
     {
+
       $last_id = $this->database->insert_id;
       return $last_id;
     } else if($this->database->error){
-      throw new \Exception("\\{$this->database->error}", 1);
+      return $error_report->report_db_error($this->database->error);
     }
 
   }
@@ -147,7 +158,7 @@ class DB_MYSQL {
 
     $sql_statement = "";
     foreach ($data as $columns => $values) {
-      $sql_statement .= "INSERRT INTO $table ($columns) VALUES ($values)";
+      $sql_statement .= "INSERT INTO $table ($columns) VALUES ($values)";
     }
 
     $this->database->multi_query($sql_statement);
@@ -158,6 +169,9 @@ class DB_MYSQL {
   */
   public function updateOne($table, $id, $data)
   {
+
+    $error_report = new ErrorReport();
+
     if(!$this->connection)
     {
       $this->connect($this->host, $this->username, $this->password, $this->db);
@@ -178,8 +192,8 @@ class DB_MYSQL {
     if($this->database->query("UPDATE $table SET $sql_update_statement WHERE id=$id") === TRUE)
     {
       return "Created";
-    } elseif($this->database["error"]){
-      return $this->database["error"];
+    } elseif($this->database->error){
+      return $error_report->report_db_error($this->database->error);
     }
   }
 

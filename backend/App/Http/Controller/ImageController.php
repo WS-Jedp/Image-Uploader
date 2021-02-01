@@ -4,6 +4,7 @@ namespace App\Http\Controller;
 
 use \App\Http\Response;
 use \App\Database\DB_MYSQL;
+use \App\Helpers\ErrorReport;
 
 class ImageController
 {
@@ -26,7 +27,8 @@ class ImageController
     header("Access-Control-Allow-Methods: GET, POST");    
     header("Access-Control-Allow-Headers: *");
 
-    global $error; 
+    global $report_error; 
+    $error_report = new ErrorReport(); 
     $target_name = ""; 
     $filename = "";
     $extension_file = ""; 
@@ -40,19 +42,14 @@ class ImageController
       $filename = $_FILES["image"]["name"];
       if(file_exists($target_name) === true)
       {
-        $error = true;        
-        $json = [
-          "status" => 401,
-          "message" => "The file already exists",
-          "files" => $_FILES
-        ];
-        return new Response('json', json_encode($json));
+      
+        return $error_report->report_internal_error('The file already exists');
       }
       
       $extension_file = strtolower(pathinfo($target_name, PATHINFO_EXTENSION));
       if(!preg_match($allows_extensions, $extension_file))
       {
-        throw new \Exception("We can't handle the file", 1);
+        return $report_error->report_internal_error("The extension of the file is wrong.");
       }
 
       if(move_uploaded_file($_FILES["image"]["tmp_name"], $target_name))
@@ -61,9 +58,8 @@ class ImageController
         $message = "The images was move successfully";
         http_response_code($status);
       } else {
-        $status = 401;
         $message = "There is an error, we can't move the file";
-        http_response_code($status);
+        return $error_report->report_internal_error($message);
       }
     } else {
       $json = [
@@ -73,11 +69,11 @@ class ImageController
       return new Response('json', json_encode($json));
     }
 
-    
-  
     $resp = $this->db->insertOneInto("images", "url", "http://localhost:3000/uploads/$filename");
 
-    $message = "The image was move successfully";
+    if($status == 201) {
+      $message = "The image was move successfully";
+    }
     $json = [
       "status" => $status,
       "message" => $message,
@@ -130,7 +126,8 @@ class ImageController
         $message = "There is an error";
       }
     } else {
-      throw new \Exception("There is no file", 1);
+      $error_report = new ErrorReport();
+      return $error_report->report_internal_error("There is no file");
     }
 
     

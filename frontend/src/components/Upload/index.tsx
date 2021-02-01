@@ -25,10 +25,10 @@ export const Upload = ({setLoading}:{setLoading: Function}) => {
 
     const resp = await data.json()
     
-    if(resp.status === 401 || !resp) {
+    if(resp.status !== 201) {
       setLoading(false)
       console.error(resp)
-    } else if(resp.status === 201) {
+    } else {
       setLoading(false)
       setLastImage(resp.data.id)
       navigate('/success')
