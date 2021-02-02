@@ -4,16 +4,18 @@ import { useDropzone } from 'react-dropzone'
 
 import { ErrorContainer } from '../ErrorContainer'
 import { ErrorModal } from '../../modals/ErrorModal'
+import { Loading } from '../Loading'
 
 import { Context } from '../../context'
 
 import DropImage from '../../assets/images/drop_image.png'
 import '../../assets/styles/upload.css'
 
-export const Upload = ({setLoading}:{setLoading: Function}) => {
+export const Upload:React.FC = () => {
 
   const { setLastImage } = useContext(Context)
   const [isError, setIsError] = useState<Boolean | string>(false)
+  const [loading, setLoading] = useState<Boolean>(false)
   const navigate = useNavigate()
 
   const onDrop = useCallback(async acceptedFiles => {
@@ -28,10 +30,9 @@ export const Upload = ({setLoading}:{setLoading: Function}) => {
 
     const resp = await data.json()
     
-    if(resp.status !== 201) {
+    if(resp.status !== 201 || !resp.status || !resp) {
       setLoading(false)
-      setIsError(resp.message)
-      console.error(resp)
+      setIsError(resp.error)
     } else {
       setLoading(false)
       setLastImage(resp.data.id)
@@ -42,6 +43,11 @@ export const Upload = ({setLoading}:{setLoading: Function}) => {
 
   const { isDragActive, getInputProps, getRootProps } = useDropzone({onDrop})
 
+  if(loading) {
+    return (
+      <Loading />
+    )
+  }
 
   return (
     <article className="upload">
@@ -56,6 +62,7 @@ export const Upload = ({setLoading}:{setLoading: Function}) => {
         Upload Your Image
       </h2>
       <span className="upload__span">File should be Jpeg,Png...</span>
+      <span className="upload__span">Also should be less than 10KB</span>
       <form method="post" className="upload__form">
           <div {...getRootProps()} className="upload__input">
             <input name="image" id="image" {...getInputProps()} />

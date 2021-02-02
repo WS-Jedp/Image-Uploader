@@ -61,6 +61,12 @@ class ImageController
         $message = "There is an error, we can't move the file";
         return $error_report->report_internal_error($message);
       }
+
+      if ($_FILES["fileUpload"]["size"] > 500000) {
+        $message = "We sorry, the size of the image is too big";
+        return $error_report->report_internal_error($message);
+      }
+
     } else {
       $json = [
         "status" => 401,

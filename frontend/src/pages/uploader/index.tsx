@@ -8,13 +8,10 @@ import { Loading } from '../../components/Loading'
 
 export const Uploader = (props:RouteComponentProps) => {
 
-  const [loading, setLoading] = useState<Boolean>(false)
 
   return (
     <Layout>
-      {
-        loading ? <Loading /> : <Upload setLoading={setLoading} />
-      }
+      <Upload />
     </Layout>
   )
 }

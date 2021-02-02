@@ -18,6 +18,7 @@
   background-color: rgb(240, 52, 52, 0.6);
   left: 3%;
   bottom: 3%;
+  animation: CloseError ease-out 4s forwards;
 }
 
 .error-modal h3 {
@@ -53,4 +54,28 @@
 
 .error-modal .close-error:hover {
   border: 1px solid rgba(0,0,0,.2);
+}
+
+@keyframes CloseError {
+  0% {
+    display: flex;
+    left: -100%;
+    opacity: 0;
+  }
+  
+  20% {
+    left: 3%;
+    opacity: 1;
+  }
+
+  80% {
+    left: 3%;
+    opacity: 1;
+  }
+
+  100%{
+    left: -100%;
+    opacity: 0;
+    display: none;
+  }
 }
