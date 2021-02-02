@@ -1,6 +1,9 @@
-import React, {useState, useCallback, useRef, useContext} from 'react'
+import React, {useState, useCallback, useContext} from 'react'
 import { useNavigate } from '@reach/router'
 import { useDropzone } from 'react-dropzone'
+
+import { ErrorContainer } from '../ErrorContainer'
+import { ErrorModal } from '../../modals/ErrorModal'
 
 import { Context } from '../../context'
 
@@ -10,9 +13,9 @@ import '../../assets/styles/upload.css'
 export const Upload = ({setLoading}:{setLoading: Function}) => {
 
   const { setLastImage } = useContext(Context)
+  const [isError, setIsError] = useState<Boolean | string>(false)
   const navigate = useNavigate()
 
-  const formRef = useRef<HTMLFormElement | null>(null)
   const onDrop = useCallback(async acceptedFiles => {
     setLoading(true);
     const formdata = new FormData()
@@ -27,6 +30,7 @@ export const Upload = ({setLoading}:{setLoading: Function}) => {
     
     if(resp.status !== 201) {
       setLoading(false)
+      setIsError(resp.message)
       console.error(resp)
     } else {
       setLoading(false)
@@ -41,11 +45,18 @@ export const Upload = ({setLoading}:{setLoading: Function}) => {
 
   return (
     <article className="upload">
+      {
+        isError && (
+          <ErrorModal>
+            <ErrorContainer title="Oops! Something went wrong." message={isError} closeError={() => setIsError(false)} />
+          </ErrorModal>
+        )
+      }
       <h2 className="upload__title">
         Upload Your Image
       </h2>
       <span className="upload__span">File should be Jpeg,Png...</span>
-      <form ref={formRef} method="post" className="upload__form">
+      <form method="post" className="upload__form">
           <div {...getRootProps()} className="upload__input">
             <input name="image" id="image" {...getInputProps()} />
             <img className="upload__image" src={DropImage} />
